@@ -1,0 +1,290 @@
+import { CuisineStyle, MorphableRecipe } from '../types';
+
+export interface CuisineOption {
+  key: CuisineStyle;
+  name: string;
+  flag: string;
+  tagline: string;
+  signatureAromatics: string[];
+}
+
+export const cuisineOptions: CuisineOption[] = [
+  {
+    key: 'mediterranean',
+    name: 'Mediterranean',
+    flag: '🇬🇷',
+    tagline: 'Bright lemon, oregano, extra-virgin olive oil & feta crumble',
+    signatureAromatics: ['Oregano', 'Lemon Zest', 'Garlic', 'EVOO', 'Kalamata / Feta'],
+  },
+  {
+    key: 'texmex',
+    name: 'Tex-Mex Cantina',
+    flag: '🇲🇽',
+    tagline: 'Smoky cumin, lime juice, charred peppers & cilantro heat',
+    signatureAromatics: ['Toasted Cumin', 'Smoked Paprika', 'Fresh Lime', 'Chili Flakes', 'Cilantro'],
+  },
+  {
+    key: 'asian',
+    name: 'East Asian Wok',
+    flag: '🇯🇵',
+    tagline: 'Savory tamari umami, minced ginger, scallions & toasted sesame',
+    signatureAromatics: ['Tamari / Soy', 'Fresh Ginger', 'Scallions', 'Toasted Sesame', 'Rice Vinegar'],
+  },
+  {
+    key: 'tuscan',
+    name: 'Tuscan Herb Sauté',
+    flag: '🇮🇹',
+    tagline: 'Fragrant rosemary, balsamic glaze, sweet cherry tomatoes & crushed garlic',
+    signatureAromatics: ['Rosemary & Basil', 'Balsamic Glaze', 'Crushed Garlic', 'Ripe Tomatoes'],
+  },
+  {
+    key: 'tikka',
+    name: 'Indian Spiced Tikka',
+    flag: '🇮🇳',
+    tagline: 'Warm turmeric, garam masala, ginger & cooling yogurt swirl',
+    signatureAromatics: ['Garam Masala', 'Golden Turmeric', 'Greek Yogurt Marinade', 'Fresh Ginger'],
+  },
+];
+
+export const sampleRecipes: MorphableRecipe[] = [
+  {
+    id: 'recipe-chicken-medley',
+    baseTitle: 'Seared Lean Protein & Farm-Stand Medley',
+    description: 'A versatile high-protein skillet base made with Chicken Breast, Bell Peppers, Red Onions, and Baby Spinach from your fridge.',
+    prepTimeMinutes: 10,
+    cookTimeMinutes: 15,
+    difficulty: 'Easy',
+    calories: 460,
+    macros: { protein: 48, carbs: 24, fat: 12, fiber: 6 },
+    basePantryRequirements: [
+      { name: 'Fresh Chicken Breast', amount: 200, unit: 'g' },
+      { name: 'Bell Peppers (Tri-Color)', amount: 1, unit: 'peppers' },
+      { name: 'Red & Yellow Onions', amount: 0.5, unit: 'onions' },
+      { name: 'Organic Baby Spinach', amount: 80, unit: 'g' },
+      { name: 'Extra Virgin Olive Oil', amount: 10, unit: 'ml' },
+    ],
+    bioTagMatch: ['post-hiit', 'hypertrophy', 'recovery'],
+    styles: {
+      mediterranean: {
+        title: 'Skillet Lemon-Oregano Mediterranean Chicken',
+        styleName: 'Mediterranean',
+        tagline: 'Herb-crusted chicken with wilted spinach, blistered cherry tomatoes & feta',
+        flag: '🇬🇷',
+        accentSpices: ['Dried Oregano', 'Lemon Juice & Zest', 'Garlic', 'Crumbled Feta'],
+        swaps: [
+          { original: 'Standard cooking oil', replacement: 'Cold-pressed Extra Virgin Olive Oil', reason: 'Healthy monounsaturated fats & polyphenols' },
+          { original: 'Heavy cream sauce', replacement: 'Fresh Lemon juice & Feta crumble', reason: 'Cuts 180 kcal while boosting tangy umami' },
+        ],
+        steps: [
+          'Dice 200g chicken breast into 1-inch cubes. Season generously with dried oregano, sea salt, black pepper, and minced garlic.',
+          'Heat 1 tbsp extra virgin olive oil in a stainless skillet over medium-high heat. Sear chicken until golden on all sides (5-6 minutes).',
+          'Toss in sliced bell peppers, red onions, and whole cherry tomatoes. Sauté for 4 minutes until crisp-tender.',
+          'Fold in 80g of baby spinach and cover with lid for 60 seconds until gently wilted.',
+          'Finish with fresh squeezed lemon juice and sprinkle 20g crumbled feta on top. Serve hot!',
+        ],
+        image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Finish off the heat before squeezing the lemon so the bright citrus aromas stay vibrant.',
+        flavorProfile: { spicy: 1, tangy: 5, savory: 4, aromatic: 5 },
+      },
+      texmex: {
+        title: 'Sizzling Smoky Tex-Mex Fajita Skillet',
+        styleName: 'Tex-Mex Cantina',
+        tagline: 'Charred bell peppers, caramelized onions & chipotle-lime marinated chicken',
+        flag: '🇲🇽',
+        accentSpices: ['Ground Cumin', 'Smoked Paprika', 'Chili Flakes', 'Lime Juice'],
+        swaps: [
+          { original: 'Sour cream topping', replacement: 'Greek Yogurt + Lime zest swirl', reason: 'Adds 12g protein while reducing saturated fats by 70%' },
+          { original: 'Refried lard beans', replacement: 'Rinsed whole black beans from pantry', reason: 'High prebiotic fiber with zero hydrogenated oils' },
+        ],
+        steps: [
+          'Slice chicken into long fajita strips. Coat with cumin, smoked paprika, chili powder, and half the lime juice.',
+          'Heat skillet to very high heat. Sear chicken aggressively for 4 minutes to achieve smoky char marks.',
+          'Add sliced bell peppers and thick onion wedges. Flash-fry for 3 minutes so peppers retain their crunch.',
+          'Stir in baby spinach and black beans right at the end to warm through.',
+          'Plate immediately, drizzle with Greek yogurt lime crema, and serve with lime wedges.',
+        ],
+        image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Do not crowd the skillet! Giving the bell peppers room allows them to char instead of steam.',
+        flavorProfile: { spicy: 4, tangy: 4, savory: 5, aromatic: 4 },
+      },
+      asian: {
+        title: 'Ginger-Tamari Chicken & Crispy Wok Stir-Fry',
+        styleName: 'East Asian Wok',
+        tagline: 'Quick wok-seared chicken with tamari glaze, ginger matchsticks & toasted sesame',
+        flag: '🇯🇵',
+        accentSpices: ['Tamari / Soy Sauce', 'Fresh Grated Ginger', 'Garlic', 'Toasted Sesame'],
+        swaps: [
+          { original: 'Sugary bottled teriyaki sauce', replacement: 'Tamari + fresh ginger + splash of water', reason: 'Eliminates 24g of high fructose corn syrup' },
+          { original: 'White rice base', replacement: 'Brown jasmine rice or cauliflower rice', reason: 'Sustained energy and lower glycemic index' },
+        ],
+        steps: [
+          'Cut chicken into bite-sized strips. In a small cup, whisk 2 tbsp tamari, grated fresh ginger, and 1 minced garlic clove.',
+          'Heat pan until smoking hot. Add chicken and stir-fry rapidly for 3-4 minutes.',
+          'Toss in sliced bell peppers and onions. Sauté vigorously for 2 minutes.',
+          'Pour in the ginger-tamari glaze. Toss for 45 seconds until it thickens and coats the chicken beautifully.',
+          'Fold in baby spinach until wilted. Garnish with toasted sesame seeds and sliced scallions.',
+        ],
+        image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Keep the pan blazing hot and moving constantly to mimic high-heat commercial wok hei.',
+        flavorProfile: { spicy: 2, tangy: 2, savory: 5, aromatic: 4 },
+      },
+      tuscan: {
+        title: 'Tuscan Garlic & Sun-Blistered Tomato Chicken',
+        styleName: 'Tuscan Herb Sauté',
+        tagline: 'Rustic Italian pan-sear with balsamic glaze, rosemary, and sweet blistered tomatoes',
+        flag: '🇮🇹',
+        accentSpices: ['Dried Rosemary', 'Sweet Basil', 'Balsamic Glaze', 'Crushed Garlic'],
+        swaps: [
+          { original: 'Heavy butter base', replacement: 'Extra Virgin Olive Oil + Tomato reduction', reason: 'Heart-healthy fat profile loaded with lycopene' },
+          { original: 'White flour dredging', replacement: 'Pan-seared au naturel with herb crust', reason: 'Keeps it clean and naturally gluten-free' },
+        ],
+        steps: [
+          'Rub chicken fillets with minced garlic, crushed rosemary, cracked pepper, and sea salt.',
+          'Pan-sear chicken in olive oil over medium-high heat for 5 minutes per side until deeply browned.',
+          'Drop whole cherry tomatoes and sliced onions into the pan around the chicken. Let the tomatoes burst and blister in the juices.',
+          'Deglaze pan with 1 tbsp balsamic vinegar and stir through baby spinach for 1 minute.',
+          'Spoon the blistered tomato juices over the sliced chicken and finish with torn basil leaves.',
+        ],
+        image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Allow the cherry tomatoes to blister until their skins crack; their natural sugars caramelize with the balsamic.',
+        flavorProfile: { spicy: 1, tangy: 4, savory: 5, aromatic: 5 },
+      },
+      tikka: {
+        title: 'Aromatic Spiced Tikka Chicken Skillet',
+        styleName: 'Indian Spiced Tikka',
+        tagline: 'Turmeric & garam masala infused tender chicken with golden spiced veggies',
+        flag: '🇮🇳',
+        accentSpices: ['Garam Masala', 'Ground Turmeric', 'Fresh Ginger', 'Greek Yogurt'],
+        swaps: [
+          { original: 'Heavy butter chicken sauce', replacement: 'Spiced Greek yogurt reduction', reason: 'Same creamy mouthfeel with 80% fewer calories and 15g extra protein' },
+          { original: 'White naan bread', replacement: 'Steamed brown rice or high-fiber vegetable bowl', reason: 'Complex carbs with zero glycemic spikes' },
+        ],
+        steps: [
+          'In a bowl, mix 2 tbsp Greek yogurt, 1 tsp garam masala, 1/2 tsp turmeric, minced garlic, and grated ginger.',
+          'Coat chicken chunks in yogurt spice mixture for 5 minutes.',
+          'Sear chicken in a hot skillet for 5 minutes until caramelized and fragrant.',
+          'Add sliced onions and peppers, sautéing until tender-crisp in the aromatic spices.',
+          'Fold in baby spinach until wilted. Top with fresh lemon juice and a swirl of cool yogurt.',
+        ],
+        image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Yogurt acts as a natural enzymatic tenderizer, ensuring the chicken stays juicy even at high pan temperatures.',
+        flavorProfile: { spicy: 4, tangy: 3, savory: 5, aromatic: 5 },
+      },
+    },
+  },
+  {
+    id: 'recipe-egg-skillet',
+    baseTitle: 'High-Protein Farm Egg & Greens Power Skillet',
+    description: 'Quick recovery meal made using your Pasture-Raised Eggs, Baby Spinach, Bell Peppers, and Onions.',
+    prepTimeMinutes: 5,
+    cookTimeMinutes: 8,
+    difficulty: 'Easy',
+    calories: 340,
+    macros: { protein: 26, carbs: 12, fat: 20, fiber: 4 },
+    basePantryRequirements: [
+      { name: 'Pasture-Raised Eggs', amount: 2, unit: 'eggs' },
+      { name: 'Organic Baby Spinach', amount: 60, unit: 'g' },
+      { name: 'Bell Peppers (Tri-Color)', amount: 0.5, unit: 'peppers' },
+      { name: 'Red & Yellow Onions', amount: 0.25, unit: 'onions' },
+    ],
+    bioTagMatch: ['post-hiit', 'sedentary', 'recovery'],
+    styles: {
+      mediterranean: {
+        title: 'Greek Garden Shakshuka with Feta & Spinach',
+        styleName: 'Mediterranean',
+        tagline: 'Gently poached eggs over blistered tomatoes, wilted greens, and sharp feta',
+        flag: '🇬🇷',
+        accentSpices: ['Oregano', 'Crushed Garlic', 'Feta Cheese', 'Olive Oil'],
+        swaps: [
+          { original: 'Processed breakfast sausage', replacement: 'Pasture eggs + extra spinach', reason: 'Pure bio-available protein without nitrates' },
+        ],
+        steps: [
+          'Sauté chopped peppers, onions, and cherry tomatoes in olive oil for 3 minutes.',
+          'Add spinach until wilted, forming two small nests in the skillet.',
+          'Crack 2 pasture eggs directly into the nests. Cover pan with lid on low heat for 3-4 minutes until whites are set.',
+          'Sprinkle with oregano, black pepper, and crumbled feta. Serve with runny yolks!',
+        ],
+        image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Use a clear glass lid so you can watch the egg yolk reach the perfect velvety jammy stage.',
+        flavorProfile: { spicy: 1, tangy: 4, savory: 4, aromatic: 4 },
+      },
+      texmex: {
+        title: 'Huevos Rancheros Fajita Scramble',
+        styleName: 'Tex-Mex Cantina',
+        tagline: 'Fluffy scrambled eggs with charred bell peppers, black beans, and chili flakes',
+        flag: '🇲🇽',
+        accentSpices: ['Cumin', 'Chili Flakes', 'Lime', 'Black Beans'],
+        swaps: [
+          { original: 'Deep fried tortilla chips', replacement: 'Warm black beans directly in skillet', reason: 'Eliminates seed oils and adds 6g dietary fiber' },
+        ],
+        steps: [
+          'Sauté diced onions and bell peppers with cumin and chili flakes until browned.',
+          'Stir in 3 tbsp black beans and baby spinach for 1 minute.',
+          'Whisk 2 eggs with a pinch of sea salt. Pour into skillet over medium-low heat.',
+          'Gently fold curds for 2 minutes until soft and creamy. Squeeze fresh lime on top.',
+        ],
+        image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Turn the heat off while eggs are still slightly wet; residual pan heat finishes the cooking.',
+        flavorProfile: { spicy: 4, tangy: 3, savory: 4, aromatic: 3 },
+      },
+      asian: {
+        title: 'Japanese Tamago Greens & Tamari Rice Bowl',
+        styleName: 'East Asian Wok',
+        tagline: 'Silky scrambled eggs with wilted ginger greens over warm brown rice',
+        flag: '🇯🇵',
+        accentSpices: ['Tamari / Soy', 'Ginger', 'Sesame Oil', 'Scallions'],
+        swaps: [
+          { original: 'Refined sugar mirin', replacement: 'Touch of tamari and natural ginger essence', reason: 'Zero added glycemic sugars' },
+        ],
+        steps: [
+          'Flash-fry sliced onions, bell peppers, and spinach with minced ginger in a drop of sesame oil.',
+          'Beat eggs with 1 tsp tamari. Add to the vegetables and fold gently into soft ribbons.',
+          'Spoon over warm brown jasmine rice from pantry.',
+          'Garnish with toasted sesame seeds and fresh scallions.',
+        ],
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Swirl the eggs slowly from the outside edges inward for luxurious ribbon texture.',
+        flavorProfile: { spicy: 1, tangy: 2, savory: 5, aromatic: 4 },
+      },
+      tuscan: {
+        title: 'Tuscan Herb Frittata Rustica',
+        styleName: 'Tuscan Herb Sauté',
+        tagline: 'Golden Italian skillet frittata with roasted garlic, tomatoes, and rosemary',
+        flag: '🇮🇹',
+        accentSpices: ['Rosemary', 'Garlic', 'Black Pepper', 'Olive Oil'],
+        swaps: [
+          { original: 'Heavy whipping cream in eggs', replacement: 'Whisked with 1 tbsp Greek yogurt', reason: 'Fluffy texture with zero heavy cream fat' },
+        ],
+        steps: [
+          'Pre-sauté onions, garlic, and cherry tomatoes in olive oil with chopped rosemary.',
+          'Whisk eggs thoroughly with Greek yogurt until frothy.',
+          'Pour egg mixture evenly over vegetables and fold in spinach.',
+          'Cook over low heat for 5 minutes, finish under broiler for 2 minutes until puffed and golden.',
+        ],
+        image: 'https://images.unsplash.com/photo-1584947897711-2092c7308253?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Broiling for just 90 seconds gives the frittata a classic puffed soufflé crown.',
+        flavorProfile: { spicy: 1, tangy: 3, savory: 5, aromatic: 5 },
+      },
+      tikka: {
+        title: 'Mumbai Masala Egg Bhurji Bowl',
+        styleName: 'Indian Spiced Tikka',
+        tagline: 'Vibrant spiced egg scramble with turmeric, ginger, chili, and cilantro',
+        flag: '🇮🇳',
+        accentSpices: ['Turmeric', 'Garam Masala', 'Ginger', 'Cilantro'],
+        swaps: [
+          { original: 'Heavy butter bhurji base', replacement: 'Olive oil + aromatic spice bloom', reason: 'Cardiovascular-protective antioxidant boost' },
+        ],
+        steps: [
+          'Heat oil with cumin, minced ginger, diced onions, and peppers until fragrant.',
+          'Add turmeric, garam masala, and spinach; stir until aromatic.',
+          'Pour in eggs and scramble vigorously over medium heat into soft spiced curds.',
+          'Finish with fresh lime juice and torn cilantro.',
+        ],
+        image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=1000&q=80',
+        chefTip: 'Blooming the spices in warm oil before adding eggs releases deep fat-soluble aromatics.',
+        flavorProfile: { spicy: 4, tangy: 3, savory: 5, aromatic: 5 },
+      },
+    },
+  },
+];
+
