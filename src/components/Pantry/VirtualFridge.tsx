@@ -2,21 +2,24 @@ import React, { useState } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Refrigerator, 
   Clock, 
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  ScanLine
 } from 'lucide-react';
 import { PantryCategory, PantryItem } from '../../types';
 import { PantryItemCard } from './PantryItemCard';
 import { AddItemModal } from './AddItemModal';
+import { RestockScannerModal } from './RestockScannerModal';
 
 interface VirtualFridgeProps {
   pantryItems: PantryItem[];
   onUpdateQuantity: (id: string, newQty: number) => void;
   onDeleteItem: (id: string) => void;
   onAddItem: (item: Omit<PantryItem, 'id' | 'addedDate'>) => void;
+  onBatchAdd: (items: Omit<PantryItem, 'id' | 'addedDate'>[]) => void;
   onFindRecipeForItem: (itemName: string) => void;
 }
 
@@ -25,11 +28,13 @@ export const VirtualFridge: React.FC<VirtualFridgeProps> = ({
   onUpdateQuantity,
   onDeleteItem,
   onAddItem,
+  onBatchAdd,
   onFindRecipeForItem,
 }) => {
   const [activeCategory, setActiveCategory] = useState<PantryCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isRestockScannerOpen, setIsRestockScannerOpen] = useState(false);
   const [sortUrgentFirst, setSortUrgentFirst] = useState(true);
 
   // Filter items
@@ -72,17 +77,27 @@ export const VirtualFridge: React.FC<VirtualFridgeProps> = ({
             </div>
             <h2 className="text-2xl font-black text-white mt-1">Virtual Fridge & Kitchen Stock</h2>
             <p className="text-xs text-slate-400 mt-1 max-w-xl">
-              Track fresh perishables with automatic shelf-life estimations. Every time you cook an AI-suggested recipe, used ingredients are automatically deducted from your fridge stock.
+              Track fresh perishables with automatic shelf-life estimations. Scan grocery hauls when unpacking to auto-restock in one tap, or let AI auto-deduct ingredients when cooking!
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Scan Grocery Restock Button */}
+            <button
+              onClick={() => setIsRestockScannerOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/25 active:scale-95"
+            >
+              <ScanLine className="w-4 h-4 stroke-[2.5]" />
+              <span>Scan Grocery Restock</span>
+            </button>
+
+            {/* Quick Add Single Item */}
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20 active:scale-95"
+              className="flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition active:scale-95"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Groceries</span>
+              <Plus className="w-4 h-4 text-emerald-400" />
+              <span>Manual Add</span>
             </button>
           </div>
         </div>
@@ -107,10 +122,10 @@ export const VirtualFridge: React.FC<VirtualFridgeProps> = ({
           </div>
 
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-            <span className="text-[11px] text-slate-400 font-medium">Auto-Deduction</span>
+            <span className="text-[11px] text-slate-400 font-medium">CV Haul Scanner</span>
             <div className="text-lg font-bold text-emerald-400 font-mono mt-0.5 flex items-center gap-1">
-              <span>Active</span>
-              <Sparkles className="w-3.5 h-3.5" />
+              <span>Ready</span>
+              <Camera className="w-3.5 h-3.5" />
             </div>
           </div>
 
@@ -177,14 +192,16 @@ export const VirtualFridge: React.FC<VirtualFridgeProps> = ({
           <AlertCircle className="w-8 h-8 text-slate-500 mx-auto mb-2" />
           <h4 className="text-sm font-bold text-white">No pantry items found</h4>
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Try adjusting your search filter, or add groceries to your virtual fridge to unlock AI recipe generation.
+            Try adjusting your search filter, or scan a grocery haul to auto-fill your virtual fridge.
           </p>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="mt-4 px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
-          >
-            Add New Groceries
-          </button>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <button
+              onClick={() => setIsRestockScannerOpen(true)}
+              className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
+            >
+              Scan Grocery Restock
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -200,13 +217,19 @@ export const VirtualFridge: React.FC<VirtualFridgeProps> = ({
         </div>
       )}
 
-      {/* Add Modal */}
+      {/* Add Modal (Single) */}
       <AddItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={onAddItem}
       />
+
+      {/* Multi-Item Grocery Restock Scanner Modal */}
+      <RestockScannerModal
+        isOpen={isRestockScannerOpen}
+        onClose={() => setIsRestockScannerOpen(false)}
+        onBatchAdd={onBatchAdd}
+      />
     </div>
   );
 };
-

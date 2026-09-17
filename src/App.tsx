@@ -61,6 +61,17 @@ export const App: React.FC = () => {
     setPantryItems((prev) => [newItem, ...prev]);
   };
 
+  // Handler: Batch add items from grocery haul scan
+  const handleBatchAddPantryItems = (items: Omit<PantryItem, 'id' | 'addedDate'>[]) => {
+    const today = new Date().toISOString().split('T')[0];
+    const newItems: PantryItem[] = items.map((item, idx) => ({
+      ...item,
+      id: `p-${Date.now()}-${idx}`,
+      addedDate: today,
+    }));
+    setPantryItems((prev) => [...newItems, ...prev]);
+  };
+
   // Handler: Update item quantity
   const handleUpdateQuantity = (id: string, newQty: number) => {
     setPantryItems((prev) =>
@@ -205,6 +216,7 @@ export const App: React.FC = () => {
               onUpdateQuantity={handleUpdateQuantity}
               onDeleteItem={handleDeleteItem}
               onAddItem={handleAddItem}
+              onBatchAdd={handleBatchAddPantryItems}
               onFindRecipeForItem={handleFindRecipeForItem}
             />
           </div>
