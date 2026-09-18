@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Play, Pause, RotateCcw, CheckCircle2, ChefHat, Timer } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MorphableRecipe, CuisineStyle } from '../../types';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface CookingModeModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
   onClose,
   onFinishCook,
 }) => {
+  const modalRef = useFocusTrap(isOpen, onClose);
   const styleData = recipe.styles[selectedStyle];
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
@@ -26,17 +28,22 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
-    let interval: any = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isTimerRunning && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsTimerRunning(false);
+            try {
+              if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+            } catch {
+              // ignore vibration error
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (timeLeft === 0 && isTimerRunning) {
-      setIsTimerRunning(false);
-      // Play ding sound or vibrate if available
-      try {
-        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
-      } catch {}
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -61,40 +68,49 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col max-h-[90vh] overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/90 backdrop-blur-md animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cooking-mode-title"
+    >
+      <div 
+        ref={modalRef}
+        className="bg-surface-900 border border-surface-border w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col max-h-[90vh] overflow-hidden"
+      >
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-surface-border">
           <div className="flex items-center space-x-3">
-            <span className="text-3xl">{styleData.flag}</span>
+            <span className="text-3xl" aria-hidden="true">{styleData.flag}</span>
             <div>
-              <div className="flex items-center space-x-2 text-xs text-emerald-400 font-bold uppercase tracking-wider">
-                <ChefHat className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-xs text-kitchen-400 font-bold uppercase tracking-wider">
+                <ChefHat className="w-4 h-4" aria-hidden="true" />
                 <span>Active Guided Cook Mode</span>
               </div>
-              <h3 className="text-lg font-bold text-white mt-0.5">{styleData.title}</h3>
+              <h3 id="cooking-mode-title" className="text-lg font-bold text-content-primary mt-0.5">{styleData.title}</h3>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+            aria-label="Close cooking mode"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-content-muted hover:text-content-primary rounded-xl hover:bg-surface-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-500 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Timer Bar */}
-        <div className="mt-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+        <div className="mt-4 p-4 rounded-2xl bg-surface-950/80 border border-surface-border flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400">
-              <Timer className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-surface-900 border border-surface-border text-kitchen-400">
+              <Timer className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-content-muted uppercase tracking-wider block">
                 Skillet Step Timer
               </span>
-              <span className="font-mono text-2xl font-bold text-white tracking-wider">
+              <span className="font-mono text-2xl font-bold text-content-primary tracking-wider" aria-label={`Time remaining: ${formatTime(timeLeft)}`}>
                 {formatTime(timeLeft)}
               </span>
             </div>
@@ -103,20 +119,21 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsTimerRunning(!isTimerRunning)}
-              className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
+              aria-label={isTimerRunning ? 'Pause step timer' : 'Start step timer'}
+              className={`min-h-[44px] min-w-[44px] flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-400 ${
                 isTimerRunning
-                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                  ? 'bg-biotech-amber hover:bg-amber-400 text-surface-950'
+                  : 'bg-kitchen-500 hover:bg-kitchen-400 text-surface-950'
               }`}
             >
               {isTimerRunning ? (
                 <>
-                  <Pause className="w-4 h-4" />
+                  <Pause className="w-4 h-4" aria-hidden="true" />
                   <span>Pause</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4" />
+                  <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                   <span>Start</span>
                 </>
               )}
@@ -127,53 +144,54 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
                 setIsTimerRunning(false);
                 setTimeLeft(180);
               }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-content-muted hover:text-content-primary hover:bg-surface-800 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-500"
+              aria-label="Reset timer to 3:00"
               title="Reset timer to 3:00"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         {/* Progress Tracker */}
-        <div className="mt-5 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-5 flex items-center justify-between text-xs text-content-muted">
           <span>Step {currentStepIndex + 1} of {styleData.steps.length}</span>
-          <span>{Math.round(((currentStepIndex + 1) / styleData.steps.length) * 100)}% Complete</span>
+          <span className="font-mono">{Math.round(((currentStepIndex + 1) / styleData.steps.length) * 100)}% Complete</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+        <div className="w-full h-1.5 bg-surface-800 rounded-full mt-2 overflow-hidden" role="progressbar" aria-valuenow={Math.round(((currentStepIndex + 1) / styleData.steps.length) * 100)} aria-valuemin={0} aria-valuemax={100}>
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+            className="h-full bg-kitchen-500 rounded-full transition-all duration-300"
             style={{ width: `${((currentStepIndex + 1) / styleData.steps.length) * 100}%` }}
           />
         </div>
 
         {/* Current Step Big Card */}
         <div className="mt-6 flex-1 overflow-y-auto pr-2">
-          <div className="p-6 rounded-2xl bg-slate-950/70 border border-slate-800/90 shadow-inner">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider block mb-2">
+          <div className="p-6 rounded-2xl bg-surface-950/70 border border-surface-border shadow-inner">
+            <span className="text-xs font-mono font-bold text-kitchen-400 uppercase tracking-wider block mb-2">
               Action Item #{currentStepIndex + 1}
             </span>
-            <p className="text-base sm:text-lg text-slate-100 font-medium leading-relaxed">
+            <p className="text-base sm:text-lg text-content-primary font-medium leading-relaxed">
               {styleData.steps[currentStepIndex]}
             </p>
           </div>
 
           {/* Chef Tip Callout */}
-          <div className="mt-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 text-xs text-emerald-300 flex items-start space-x-2.5">
-            <span className="text-base">💡</span>
+          <div className="mt-4 p-4 rounded-xl bg-kitchen-950/30 border border-kitchen-500/20 text-xs text-kitchen-300 flex items-start space-x-2.5">
+            <span className="text-base" aria-hidden="true">💡</span>
             <div>
-              <span className="font-bold block text-white">Chef's Morphing Tip:</span>
-              <p className="text-slate-300 mt-0.5">{styleData.chefTip}</p>
+              <span className="font-bold block text-content-primary">Chef's Morphing Tip:</span>
+              <p className="text-content-secondary mt-0.5">{styleData.chefTip}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation Step Buttons */}
-        <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+        <div className="mt-6 pt-4 border-t border-surface-border flex items-center justify-between">
           <button
             disabled={currentStepIndex === 0}
             onClick={() => setCurrentStepIndex((prev) => Math.max(0, prev - 1))}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+            className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-content-muted hover:text-content-primary disabled:opacity-30 disabled:cursor-not-allowed transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-500"
           >
             Previous Step
           </button>
@@ -181,16 +199,16 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
           {currentStepIndex < styleData.steps.length - 1 ? (
             <button
               onClick={() => setCurrentStepIndex((prev) => prev + 1)}
-              className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-md shadow-emerald-500/20"
+              className="min-h-[44px] px-6 py-2.5 rounded-xl bg-kitchen-500 hover:bg-kitchen-400 text-surface-950 font-bold text-xs transition shadow-md shadow-kitchen-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-400"
             >
               Next Step →
             </button>
           ) : (
             <button
               onClick={handleCompleteAll}
-              className="flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs transition shadow-xl shadow-emerald-500/30 active:scale-95"
+              className="min-h-[44px] flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-kitchen-500 hover:bg-kitchen-400 text-surface-950 font-black text-xs transition shadow-xl shadow-kitchen-500/30 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-400"
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
               <span>Finish Cooking & Auto-Deduct Fridge!</span>
             </button>
           )}
@@ -199,4 +217,5 @@ export const CookingModeModal: React.FC<CookingModeModalProps> = ({
     </div>
   );
 };
+
 

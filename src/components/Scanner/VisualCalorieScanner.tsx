@@ -3,11 +3,7 @@ import {
   ScanLine, 
   Camera, 
   CheckCircle2, 
-  Sparkles, 
-  Layers, 
-  Maximize2, 
   UploadCloud, 
-  Info,
   Scale
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -72,31 +68,31 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="bg-surface-900/80 border border-surface-border rounded-2xl p-6 backdrop-blur-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-sky-400">
-              <ScanLine className="w-4 h-4" />
+            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-biotech-blue">
+              <ScanLine className="w-4 h-4" aria-hidden="true" />
               <span>Zero-Entry Visual Calorie Estimation</span>
             </div>
-            <h2 className="text-2xl font-black text-white mt-1">Computer Vision Plate Volume Scanner</h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+            <h2 className="text-2xl font-black text-content-primary mt-1">Computer Vision Plate Volume Scanner</h2>
+            <p className="text-xs text-content-muted mt-1 max-w-2xl">
               Forget typing chicken weights or searching database entries. Snap your plate after cooking—the AI automatically measures plate diameter, calculates volumetric density, segments food boundaries, and logs macros without manual input.
             </p>
           </div>
 
           {/* Sample Selectors */}
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-slate-400 hidden sm:inline">Try Demo Meals:</span>
+            <span className="text-xs text-content-muted hidden sm:inline font-medium">Try Demo Meals:</span>
             <div className="flex gap-1.5">
               {samplePlateScans.map((scan, idx) => (
                 <button
                   key={scan.id}
                   onClick={() => handleScanSimulation(scan)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                  className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-biotech-blue ${
                     selectedScan.id === scan.id && !uploadedImagePreview
-                      ? 'bg-sky-500/20 border-sky-400 text-sky-300'
-                      : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white'
+                      ? 'bg-biotech-blue/20 border-biotech-blue text-sky-300 font-bold'
+                      : 'bg-surface-800/80 border-surface-700 text-content-secondary hover:text-content-primary'
                   }`}
                 >
                   Meal #{idx + 1}
@@ -108,8 +104,8 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
 
         {/* Success Alert */}
         {logSuccessMessage && (
-          <div className="mt-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center space-x-2 animate-in fade-in">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="mt-4 p-3 rounded-xl bg-kitchen-950/60 border border-kitchen-500/40 text-kitchen-300 text-xs flex items-center space-x-2 animate-in fade-in" role="status" aria-live="polite">
+            <CheckCircle2 className="w-4 h-4 text-kitchen-400 shrink-0" aria-hidden="true" />
             <span>{logSuccessMessage}</span>
           </div>
         )}
@@ -119,26 +115,26 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Interactive Camera Viewport */}
         <div className="lg:col-span-7 space-y-3">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-4 relative overflow-hidden backdrop-blur-md shadow-2xl">
+          <div className="bg-surface-900/80 border border-surface-border rounded-3xl p-4 relative overflow-hidden backdrop-blur-md shadow-2xl">
             {/* Viewport Frame */}
-            <div className="relative aspect-square sm:aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center">
+            <div className="relative aspect-square sm:aspect-[4/3] w-full rounded-2xl overflow-hidden bg-surface-950 border border-surface-border flex items-center justify-center">
               {/* The Meal Image */}
               <img
                 src={uploadedImagePreview || selectedScan.imageUrl}
-                alt={selectedScan.dishName}
+                alt={`Calibrated plate scan of ${selectedScan.dishName} for volumetric calorie estimation`}
                 className="w-full h-full object-cover select-none"
               />
 
               {/* Plate Calibration Reference Ring */}
-              <div className="absolute inset-4 sm:inset-8 border border-dashed border-sky-400/40 rounded-full pointer-events-none flex items-center justify-center">
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-sm border border-sky-400/30 text-[10px] font-mono text-sky-300">
+              <div className="absolute inset-4 sm:inset-8 border border-dashed border-biotech-blue/40 rounded-full pointer-events-none flex items-center justify-center" aria-hidden="true">
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded bg-surface-900/90 backdrop-blur-sm border border-biotech-blue/30 text-[10px] font-mono text-sky-300">
                   Plate Reference: {selectedScan.plateDiameterCm} cm
                 </div>
               </div>
 
               {/* Scanning Radar Line */}
               {isScanning && (
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_15px_#38bdf8] animate-radar pointer-events-none" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-biotech-blue to-transparent shadow-[0_0_15px_#38bdf8] animate-radar pointer-events-none" />
               )}
 
               {/* Bounding Box Overlays */}
@@ -146,41 +142,44 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
                 selectedScan.detectedItems.map((item) => {
                   const isHovered = activeItemHighlight === item.id;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={item.id}
                       onMouseEnter={() => setActiveItemHighlight(item.id)}
                       onMouseLeave={() => setActiveItemHighlight(null)}
+                      onClick={() => setActiveItemHighlight(activeItemHighlight === item.id ? null : item.id)}
+                      aria-label={`${item.name}, estimated ${item.estimatedWeightGrams} grams, ${item.calories} calories`}
                       style={{
                         top: `${item.box.top}%`,
                         left: `${item.box.left}%`,
                         width: `${item.box.width}%`,
                         height: `${item.box.height}%`,
                       }}
-                      className={`absolute border-2 rounded-xl transition-all cursor-pointer flex flex-col justify-between p-1.5 ${
+                      className={`absolute border-2 rounded-xl transition-all cursor-pointer flex flex-col justify-between p-1.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-biotech-blue ${
                         isHovered
                           ? 'border-white bg-white/20 shadow-lg scale-102 z-20'
-                          : 'border-sky-400/70 bg-sky-500/10 hover:border-sky-300 z-10'
+                          : 'border-biotech-blue/70 bg-biotech-blue/10 hover:border-sky-300 z-10'
                       }`}
                     >
                       <div className="self-start">
-                        <span className="px-1.5 py-0.5 rounded-md bg-slate-900/90 text-[10px] font-bold text-white border border-slate-700 shadow-sm">
+                        <span className="px-1.5 py-0.5 rounded-md bg-surface-900/90 text-[10px] font-bold text-content-primary border border-surface-border shadow-sm">
                           {item.name} (~{item.estimatedWeightGrams}g)
                         </span>
                       </div>
 
                       <div className="self-end">
-                        <span className="px-1.5 py-0.5 rounded-md bg-sky-950/90 text-[10px] font-mono text-sky-300 font-bold border border-sky-500/40">
+                        <span className="px-1.5 py-0.5 rounded-md bg-surface-950/90 text-[10px] font-mono text-sky-300 font-bold border border-biotech-blue/40">
                           {item.calories} kcal
                         </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
 
               {/* Viewport HUD Elements */}
               <div className="absolute top-3 right-3 flex items-center space-x-1.5">
-                <span className="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-slate-700 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="px-2.5 py-1 rounded-full bg-surface-900/80 backdrop-blur-md text-[10px] font-mono text-content-secondary border border-surface-700 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-kitchen-400 animate-ping" aria-hidden="true" />
                   CV Engine Active
                 </span>
               </div>
@@ -188,22 +187,27 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
 
             {/* Camera / Upload Controls */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <label className="cursor-pointer flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
-                <UploadCloud className="w-4 h-4 text-sky-400" />
+              <label 
+                htmlFor="calorie-file-input"
+                className="cursor-pointer min-h-[44px] flex items-center space-x-2 px-4 py-2 rounded-xl bg-surface-800 hover:bg-surface-750 text-content-primary text-xs font-semibold border border-surface-700 transition focus-within:ring-2 focus-within:ring-biotech-blue"
+              >
+                <UploadCloud className="w-4 h-4 text-biotech-blue" aria-hidden="true" />
                 <span>Upload Food Photo</span>
                 <input
+                  id="calorie-file-input"
                   type="file"
                   accept="image/*"
                   onChange={handleFileUpload}
-                  className="hidden"
+                  className="sr-only"
+                  aria-label="Upload food photo"
                 />
               </label>
 
               <button
                 onClick={() => handleScanSimulation(selectedScan)}
-                className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold transition shadow-md shadow-sky-500/20 active:scale-95"
+                className="min-h-[44px] flex items-center space-x-2 px-4 py-2 rounded-xl bg-biotech-blue hover:bg-sky-400 text-surface-950 text-xs font-bold transition shadow-md shadow-biotech-blue/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-biotech-blue"
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-4 h-4" aria-hidden="true" />
                 <span>Re-Analyze Plate Calibration</span>
               </button>
             </div>
@@ -212,62 +216,62 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
 
         {/* Right: Volumetric & Nutrition Summary */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
+          <div className="bg-surface-900/80 border border-surface-border rounded-3xl p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
             <div>
               {/* Header */}
-              <div className="pb-4 border-b border-slate-800">
-                <div className="flex items-center space-x-2 text-xs text-sky-400 font-bold uppercase tracking-wider">
-                  <Scale className="w-4 h-4" />
+              <div className="pb-4 border-b border-surface-border">
+                <div className="flex items-center space-x-2 text-xs text-biotech-blue font-bold uppercase tracking-wider">
+                  <Scale className="w-4 h-4" aria-hidden="true" />
                   <span>Volumetric Estimation Matrix</span>
                 </div>
-                <h3 className="text-xl font-black text-white mt-1">{selectedScan.dishName}</h3>
-                <p className="text-xs text-slate-400 mt-0.5">{selectedScan.tag}</p>
+                <h3 className="text-xl font-black text-content-primary mt-1">{selectedScan.dishName}</h3>
+                <p className="text-xs text-content-muted mt-0.5">{selectedScan.tag}</p>
               </div>
 
               {/* Total Calorie Banner */}
-              <div className="my-5 p-4 rounded-2xl bg-gradient-to-r from-sky-950/40 via-slate-900 to-slate-950 border border-sky-500/30 flex items-center justify-between">
+              <div className="my-5 p-4 rounded-2xl bg-gradient-to-r from-sky-950/40 via-surface-900 to-surface-950 border border-biotech-blue/30 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 font-medium block">Total Estimated Calories</span>
+                  <span className="text-xs text-content-muted font-medium block">Total Estimated Calories</span>
                   <div className="flex items-baseline space-x-2 mt-0.5">
-                    <span className="text-3xl font-extrabold text-white font-mono">
+                    <span className="text-3xl font-extrabold text-content-primary font-mono">
                       {selectedScan.totalMacros.calories}
                     </span>
-                    <span className="text-sm text-sky-400 font-bold font-mono">kcal</span>
+                    <span className="text-sm text-biotech-blue font-bold font-mono">kcal</span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block">Total Plated Mass</span>
-                  <span className="text-base font-bold text-slate-200 font-mono">
+                  <span className="text-[10px] text-content-muted block font-medium">Total Plated Mass</span>
+                  <span className="text-base font-bold text-content-primary font-mono">
                     ~{selectedScan.totalEstimatedWeightGrams} grams
                   </span>
-                  <span className="text-[10px] text-emerald-400 block font-semibold mt-0.5">97% CV Confidence</span>
+                  <span className="text-[10px] text-kitchen-400 block font-semibold mt-0.5">97% CV Confidence</span>
                 </div>
               </div>
 
               {/* Macro breakdown chips */}
               <div className="grid grid-cols-4 gap-2 text-center mb-5">
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Protein</span>
-                  <span className="text-xs font-bold text-sky-400 font-mono">
+                <div className="bg-surface-950/60 p-2.5 rounded-xl border border-surface-border">
+                  <span className="text-[10px] text-content-muted block font-medium">Protein</span>
+                  <span className="text-xs font-bold text-biotech-blue font-mono">
                     {selectedScan.totalMacros.protein}g
                   </span>
                 </div>
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Carbs</span>
-                  <span className="text-xs font-bold text-amber-400 font-mono">
+                <div className="bg-surface-950/60 p-2.5 rounded-xl border border-surface-border">
+                  <span className="text-[10px] text-content-muted block font-medium">Carbs</span>
+                  <span className="text-xs font-bold text-biotech-amber font-mono">
                     {selectedScan.totalMacros.carbs}g
                   </span>
                 </div>
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Fat</span>
-                  <span className="text-xs font-bold text-rose-400 font-mono">
+                <div className="bg-surface-950/60 p-2.5 rounded-xl border border-surface-border">
+                  <span className="text-[10px] text-content-muted block font-medium">Fat</span>
+                  <span className="text-xs font-bold text-biotech-rose font-mono">
                     {selectedScan.totalMacros.fat}g
                   </span>
                 </div>
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Fiber</span>
-                  <span className="text-xs font-bold text-emerald-400 font-mono">
+                <div className="bg-surface-950/60 p-2.5 rounded-xl border border-surface-border">
+                  <span className="text-[10px] text-content-muted block font-medium">Fiber</span>
+                  <span className="text-xs font-bold text-kitchen-400 font-mono">
                     {selectedScan.totalMacros.fiber}g
                   </span>
                 </div>
@@ -275,49 +279,51 @@ export const VisualCalorieScanner: React.FC<VisualCalorieScannerProps> = ({ onLo
 
               {/* Segmented Items Breakdown */}
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-content-muted block mb-1">
                   Detected Food Segments:
                 </span>
                 {selectedScan.detectedItems.map((item) => (
-                  <div
+                  <button
+                    type="button"
                     key={item.id}
                     onMouseEnter={() => setActiveItemHighlight(item.id)}
                     onMouseLeave={() => setActiveItemHighlight(null)}
-                    className={`p-3 rounded-xl border transition flex items-center justify-between text-xs cursor-pointer ${
+                    onClick={() => setActiveItemHighlight(activeItemHighlight === item.id ? null : item.id)}
+                    className={`w-full min-h-[44px] p-3 rounded-xl border transition flex items-center justify-between text-xs cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-biotech-blue ${
                       activeItemHighlight === item.id
-                        ? 'bg-slate-800 border-sky-400'
-                        : 'bg-slate-950/40 border-slate-800/80 hover:border-slate-700'
+                        ? 'bg-surface-800 border-biotech-blue'
+                        : 'bg-surface-950/40 border-surface-border hover:border-surface-700'
                     }`}
                   >
                     <div>
-                      <div className="font-bold text-white flex items-center space-x-1.5">
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      <div className="font-bold text-content-primary flex items-center space-x-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
                         <span>{item.name}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
-                        Est. Weight: <span className="font-mono text-slate-300 font-semibold">{item.estimatedWeightGrams}g</span> • Confidence {Math.round(item.confidence * 100)}%
+                      <div className="text-[11px] text-content-muted mt-0.5">
+                        Est. Weight: <span className="font-mono text-content-secondary font-semibold">{item.estimatedWeightGrams}g</span> • Confidence {Math.round(item.confidence * 100)}%
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <span className="font-mono font-bold text-sky-400 text-sm">{item.calories} kcal</span>
-                      <div className="text-[10px] text-slate-400">P:{item.protein}g C:{item.carbs}g F:{item.fat}g</div>
+                      <span className="font-mono font-bold text-biotech-blue text-sm">{item.calories} kcal</span>
+                      <div className="text-[10px] text-content-muted font-medium">P:{item.protein}g C:{item.carbs}g F:{item.fat}g</div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Zero-Effort Log CTA */}
-            <div className="mt-6 pt-4 border-t border-slate-800">
+            <div className="mt-6 pt-4 border-t border-surface-border">
               <button
                 onClick={handleLogToDiary}
-                className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-sky-500/25 active:scale-98"
+                className="w-full min-h-[44px] flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-kitchen-500 hover:bg-kitchen-400 text-surface-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-kitchen-500/25 active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kitchen-400"
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 <span>Zero-Entry: Log Plate to Daily Diary</span>
               </button>
-              <p className="text-[10px] text-center text-slate-500 mt-2">
+              <p className="text-[10px] text-center text-content-muted mt-2">
                 No typing numbers • Calibration done automatically via plate diameter
               </p>
             </div>

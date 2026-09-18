@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Navbar } from './components/Layout/Navbar';
 import { BioSyncWidget } from './components/Dashboard/BioSyncWidget';
 import { MacroRings } from './components/Dashboard/MacroRings';
@@ -8,7 +8,14 @@ import { CuisineMorpher } from './components/Chef/CuisineMorpher';
 import { VisualCalorieScanner } from './components/Scanner/VisualCalorieScanner';
 import { DishDeconstructor } from './components/ReverseEngineer/DishDeconstructor';
 import { SubscriptionPlans } from './components/Subscription/SubscriptionPlans';
-import { UserProfileModal } from './components/User/UserProfileModal';
+import { ToastProvider } from './context/ToastContext';
+import { useToast } from './hooks/useToast';
+
+
+// Lazy-load modal for performance and production bundle hygiene
+const UserProfileModal = lazy(() =>
+  import('./components/User/UserProfileModal').then((m) => ({ default: m.UserProfileModal }))
+);
 
 import { 
   PantryItem, 
@@ -77,7 +84,8 @@ const defaultSubscription: Subscription = {
   ],
 };
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'pantry' | 'chef' | 'scanner' | 'reverse' | 'plans'>('dashboard');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>(getStoredPantry);
   const [diary, setDiary] = useState<DailyLogItem[]>(getStoredDiary);
@@ -123,6 +131,7 @@ export const App: React.FC = () => {
       addedDate: new Date().toISOString().split('T')[0],
     };
     setPantryItems((prev) => [newItem, ...prev]);
+    showToast(`Added ${item.name} to Virtual Fridge!`, 'success');
   };
 
   // Handler: Batch add items from grocery haul scan
@@ -134,6 +143,7 @@ export const App: React.FC = () => {
       addedDate: today,
     }));
     setPantryItems((prev) => [...newItems, ...prev]);
+    showToast(`Restocked fridge: added ${items.length} detected groceries!`, 'success');
   };
 
   // Handler: Update item quantity
@@ -164,6 +174,7 @@ export const App: React.FC = () => {
       source: 'cooked_recipe',
     };
     setDiary((prev) => [newLogItem, ...prev]);
+    showToast(`Cooked ${recipe.styles[style].title}! Fridge inventory deducted.`, 'success');
   };
 
   // Handler: Log Scanned Meal from CV Scanner
@@ -174,6 +185,7 @@ export const App: React.FC = () => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setDiary((prev) => [newLogItem, ...prev]);
+    showToast(`Logged ${meal.name} (+${meal.calories} kcal) to daily diary!`, 'success');
   };
 
   // Handler: Cook Healthified Reverse-Engineered Meal
@@ -197,6 +209,7 @@ export const App: React.FC = () => {
       source: 'reverse_engineer',
     };
     setDiary((prev) => [newLogItem, ...prev]);
+    showToast(`Cooked ${meal.healthifiedVersion.title}! Healthified macros logged.`, 'success');
   };
 
   // Handler: Delete Diary Item
@@ -222,6 +235,7 @@ export const App: React.FC = () => {
         },
       ]);
       setBioState('post-hiit');
+      showToast('Reset pantry inventory and diary to initial state.', 'info');
     }
   };
 
@@ -233,8 +247,14 @@ export const App: React.FC = () => {
 
   // Handler: Save User Profile to Database
   const handleSaveProfile = async (updated: UserProfile) => {
-    setUser(updated);
-    await saveUserProfileToDb(updated);
+    try {
+      const saved = await saveUserProfileToDb(updated);
+      setUser(saved);
+      showToast('Profile updated and synchronized to database.', 'success');
+    } catch (err: any) {
+      setUser(updated);
+      showToast(`Saved locally: ${err.message || 'Offline fallback active'}`, 'warning');
+    }
   };
 
   // Handler: Upgrade Subscription in Database
@@ -244,15 +264,16 @@ export const App: React.FC = () => {
     paymentMethod: string,
     price: number
   ) => {
-    const updatedSub = await upgradeSubscriptionInDb({
-      tier,
-      billingCycle,
-      paymentMethod,
-      pricePerMonth: price,
-    });
-    if (updatedSub) {
+    try {
+      const updatedSub = await upgradeSubscriptionInDb({
+        tier,
+        billingCycle,
+        paymentMethod,
+        pricePerMonth: price,
+      });
       setSubscription(updatedSub);
-    } else {
+      showToast(`Successfully upgraded to ${tier.toUpperCase()} (${billingCycle})!`, 'success');
+    } catch (err: any) {
       // Offline fallback
       setSubscription((prev) => ({
         ...prev,
@@ -261,26 +282,29 @@ export const App: React.FC = () => {
         pricePerMonth: price,
         paymentMethod,
       }));
+      showToast(`Subscription saved locally: ${err.message || 'Offline fallback active'}`, 'warning');
     }
   };
 
   // Handler: Cancel Subscription
   const handleCancelSubscription = async () => {
-    const updatedSub = await cancelSubscriptionInDb();
-    if (updatedSub) {
+    try {
+      const updatedSub = await cancelSubscriptionInDb();
       setSubscription(updatedSub);
-    } else {
+      showToast('Subscription cancelled. Downgraded to Free plan.', 'info');
+    } catch {
       setSubscription((prev) => ({
         ...prev,
         tier: 'free',
         status: 'canceled',
         pricePerMonth: 0,
       }));
+      showToast('Subscription cancelled locally.', 'info');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-surface-950 text-content-primary flex flex-col selection:bg-kitchen-500 selection:text-surface-950">
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
@@ -376,19 +400,23 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* User Profile & Database Settings Modal */}
-      <UserProfileModal
-        isOpen={isProfileModalOpen}
-        user={user}
-        onClose={() => setIsProfileModalOpen(false)}
-        onSave={handleSaveProfile}
-      />
+      {/* User Profile & Database Settings Modal (Lazy Loaded) */}
+      {isProfileModalOpen && (
+        <Suspense fallback={null}>
+          <UserProfileModal
+            isOpen={isProfileModalOpen}
+            user={user}
+            onClose={() => setIsProfileModalOpen(false)}
+            onSave={handleSaveProfile}
+          />
+        </Suspense>
+      )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
+      <footer className="border-t border-surface-border bg-surface-950 py-6 text-center text-xs text-content-muted">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>KitchenSync AI — Zero-Effort Kitchen & Biological Fuel Management</span>
-          <span className="text-slate-400">
+          <span className="text-content-muted">
             Built for The Busy Health-Conscious Professional • Persistent Database & Stripe-Ready Subscriptions
           </span>
         </div>
@@ -397,4 +425,13 @@ export const App: React.FC = () => {
   );
 };
 
+export const App: React.FC = () => {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+};
+
 export default App;
+

@@ -3,41 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-kitchen-500 selection:text-white;
+    @apply bg-surface-950 text-content-primary font-sans antialiased min-h-screen selection:bg-kitchen-500 selection:text-white;
+  }
+
+  /* Accessible global focus ring (WCAG 2.1 AA) */
+  :focus-visible {
+    @apply outline-none ring-2 ring-kitchen-500 ring-offset-2 ring-offset-surface-950;
   }
 }
 
-/* Custom scrollbar styling */
+/* Custom scrollbar styling using design tokens */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0b1322;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1e324f;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #284166;
 }
 
-/* Glow effects */
+/* Glow utility effects with design tokens */
 .glow-kitchen {
-  box-shadow: 0 0 25px -5px rgba(50, 171, 117, 0.35);
+  box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.35);
 }
 
-.glow-biotech {
+.glow-biotech-blue {
   box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.35);
 }
 
-.glow-amber {
+.glow-biotech-purple {
+  box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.35);
+}
+
+.glow-biotech-amber {
   box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+}
+
+.glow-biotech-rose {
+  box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
 }
 
 /* Radar pulse animation for scanner */
@@ -57,4 +74,14 @@
 
 .animate-radar {
   animation: radar-sweep 2.2s ease-in-out infinite alternate;
+}
+
+/* Respect user motion preferences (WCAG AA) */
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar,
+  .animate-pulse,
+  .animate-spin,
+  .animate-ping {
+    animation: none !important;
+  }
 }

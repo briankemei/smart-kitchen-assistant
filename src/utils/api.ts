@@ -16,22 +16,18 @@ export async function fetchUserProfile(): Promise<{ user: UserProfile; subscript
   return null;
 }
 
-export async function saveUserProfileToDb(profile: Partial<UserProfile>): Promise<UserProfile | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/user/profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.success) {
-      return data.user;
-    }
-  } catch (err) {
-    console.warn('Failed to save user profile to database API', err);
+export async function saveUserProfileToDb(profile: Partial<UserProfile>): Promise<UserProfile> {
+  const res = await fetch(`${API_BASE_URL}/user/profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(profile),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to save profile`);
+  const data = await res.json();
+  if (data.success && data.user) {
+    return data.user;
   }
-  return null;
+  throw new Error(data.message || 'Unknown database save error');
 }
 
 export async function upgradeSubscriptionInDb(params: {
@@ -39,39 +35,32 @@ export async function upgradeSubscriptionInDb(params: {
   billingCycle: BillingCycle;
   paymentMethod: string;
   pricePerMonth: number;
-}): Promise<Subscription | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/subscription/upgrade`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.success) {
-      return data.subscription;
-    }
-  } catch (err) {
-    console.warn('Failed to update subscription in database API', err);
+}): Promise<Subscription> {
+  const res = await fetch(`${API_BASE_URL}/subscription/upgrade`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update subscription`);
+  const data = await res.json();
+  if (data.success && data.subscription) {
+    return data.subscription;
   }
-  return null;
+  throw new Error(data.message || 'Unknown subscription upgrade error');
 }
 
-export async function cancelSubscriptionInDb(): Promise<Subscription | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/subscription/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: 'usr-1' }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.success) {
-      return data.subscription;
-    }
-  } catch (err) {
-    console.warn('Failed to cancel subscription in database API', err);
+export async function cancelSubscriptionInDb(): Promise<Subscription> {
+  const res = await fetch(`${API_BASE_URL}/subscription/cancel`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: 'usr-1' }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to cancel subscription`);
+  const data = await res.json();
+  if (data.success && data.subscription) {
+    return data.subscription;
   }
-  return null;
+  throw new Error(data.message || 'Unknown subscription cancellation error');
 }
+
 
