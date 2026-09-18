@@ -119,3 +119,75 @@ export interface DailyLogItem {
   source: 'visual_scan' | 'cooked_recipe' | 'reverse_engineer' | 'manual';
 }
 
+export type FitnessGoal = 
+  | 'muscle_hypertrophy' 
+  | 'fat_loss_cutting' 
+  | 'metabolic_longevity' 
+  | 'athletic_performance';
+
+export type DietaryPreference = 
+  | 'high_protein_athletic' 
+  | 'mediterranean' 
+  | 'keto_low_carb' 
+  | 'plant_based' 
+  | 'gluten_free_clean';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  fitnessGoal: FitnessGoal;
+  dietaryPreference: DietaryPreference;
+  dailyCalorieGoal: number;
+  targetProteinGrams: number;
+  targetCarbsGrams: number;
+  targetFatGrams: number;
+  connectedWearable: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SubscriptionTier = 'free' | 'pro' | 'elite';
+export type BillingCycle = 'monthly' | 'annual';
+
+export interface InvoiceItem {
+  id: string;
+  date: string;
+  amount: number;
+  planName: string;
+  status: 'paid' | 'pending' | 'failed';
+  paymentMethod: string;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  tier: SubscriptionTier;
+  status: 'active' | 'trialing' | 'canceled';
+  billingCycle: BillingCycle;
+  pricePerMonth: number;
+  renewsAt: string;
+  paymentMethod: string;
+  invoices: InvoiceItem[];
+}
+
+export interface PlanDefinition {
+  tier: SubscriptionTier;
+  name: string;
+  tagline: string;
+  monthlyPrice: number;
+  annualPricePerMonth: number;
+  badge?: string;
+  popular?: boolean;
+  features: string[];
+  limits: {
+    scansPerMonth: number | 'unlimited';
+    restockHaulScans: boolean;
+    cuisineMorphing: boolean;
+    bioSyncWearable: boolean;
+    mealReverseAI: boolean;
+    aiChefConcierge: boolean;
+  };
+}
+

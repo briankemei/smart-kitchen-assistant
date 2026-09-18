@@ -1,0 +1,41 @@
+{
+  "users": [
+    {
+      "id": "usr-1",
+      "name": "Brian Kemei",
+      "email": "brian@kitchensync.ai",
+      "avatar": "👨‍🍳",
+      "fitnessGoal": "muscle_hypertrophy",
+      "dietaryPreference": "high_protein_athletic",
+      "dailyCalorieGoal": 2450,
+      "targetProteinGrams": 180,
+      "targetCarbsGrams": 220,
+      "targetFatGrams": 65,
+      "connectedWearable": "Apple Watch Ultra 2",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-18T14:30:42.514Z"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "sub-1",
+      "userId": "usr-1",
+      "tier": "pro",
+      "status": "active",
+      "billingCycle": "monthly",
+      "pricePerMonth": 14.99,
+      "renewsAt": "2026-10-18T10:00:00.000Z",
+      "paymentMethod": "•••• 4242 (Visa)",
+      "invoices": [
+        {
+          "id": "inv-2026-09-18",
+          "date": "2026-09-18",
+          "amount": 14.99,
+          "planName": "KitchenSync Pro (Monthly)",
+          "status": "paid",
+          "paymentMethod": "•••• 4242 (Visa)"
+        }
+      ]
+    }
+  ]
+}

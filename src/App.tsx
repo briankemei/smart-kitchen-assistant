@@ -7,6 +7,8 @@ import { VirtualFridge } from './components/Pantry/VirtualFridge';
 import { CuisineMorpher } from './components/Chef/CuisineMorpher';
 import { VisualCalorieScanner } from './components/Scanner/VisualCalorieScanner';
 import { DishDeconstructor } from './components/ReverseEngineer/DishDeconstructor';
+import { SubscriptionPlans } from './components/Subscription/SubscriptionPlans';
+import { UserProfileModal } from './components/User/UserProfileModal';
 
 import { 
   PantryItem, 
@@ -14,7 +16,11 @@ import {
   BioStateKey, 
   MorphableRecipe, 
   CuisineStyle, 
-  SocialReverseMeal 
+  SocialReverseMeal,
+  UserProfile,
+  Subscription,
+  SubscriptionTier,
+  BillingCycle
 } from './types';
 import { bioSyncProfiles } from './data/bioSyncProfiles';
 import { 
@@ -27,13 +33,71 @@ import {
   getStoredBioState, 
   saveBioState 
 } from './utils/storage';
+import { 
+  fetchUserProfile, 
+  saveUserProfileToDb, 
+  upgradeSubscriptionInDb, 
+  cancelSubscriptionInDb 
+} from './utils/api';
+
+const defaultUser: UserProfile = {
+  id: 'usr-1',
+  name: 'Brian Kemei',
+  email: 'brian@kitchensync.ai',
+  avatar: '👨‍🍳',
+  fitnessGoal: 'muscle_hypertrophy',
+  dietaryPreference: 'high_protein_athletic',
+  dailyCalorieGoal: 2450,
+  targetProteinGrams: 180,
+  targetCarbsGrams: 220,
+  targetFatGrams: 65,
+  connectedWearable: 'Apple Watch Ultra 2',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+const defaultSubscription: Subscription = {
+  id: 'sub-1',
+  userId: 'usr-1',
+  tier: 'pro',
+  status: 'active',
+  billingCycle: 'monthly',
+  pricePerMonth: 14.99,
+  renewsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  paymentMethod: '•••• 4242 (Visa)',
+  invoices: [
+    {
+      id: 'inv-init',
+      date: new Date().toISOString().split('T')[0],
+      amount: 14.99,
+      planName: 'KitchenSync Pro (Monthly)',
+      status: 'paid',
+      paymentMethod: '•••• 4242 (Visa)',
+    },
+  ],
+};
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'pantry' | 'chef' | 'scanner' | 'reverse'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'pantry' | 'chef' | 'scanner' | 'reverse' | 'plans'>('dashboard');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>(getStoredPantry);
   const [diary, setDiary] = useState<DailyLogItem[]>(getStoredDiary);
   const [bioState, setBioState] = useState<BioStateKey>(getStoredBioState);
   const [targetIngredientForRecipe, setTargetIngredientForRecipe] = useState<string | null>(null);
+
+  // User & Subscription state synced with Database
+  const [user, setUser] = useState<UserProfile>(defaultUser);
+  const [subscription, setSubscription] = useState<Subscription>(defaultSubscription);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Fetch initial profile & subscription from database API on mount
+  useEffect(() => {
+    fetchUserProfile().then((res) => {
+      if (res) {
+        setUser(res.user);
+        setSubscription(res.subscription);
+      }
+    });
+  }, []);
 
   // Sync state changes to storage
   useEffect(() => {
@@ -114,7 +178,6 @@ export const App: React.FC = () => {
 
   // Handler: Cook Healthified Reverse-Engineered Meal
   const handleCookHealthified = (meal: SocialReverseMeal) => {
-    // Deduct basic matches
     const dummyReqs = [
       { name: 'Fresh Chicken Breast', amount: 150, unit: 'g' },
       { name: 'Organic Baby Spinach', amount: 50, unit: 'g' },
@@ -168,6 +231,54 @@ export const App: React.FC = () => {
     setActiveTab('chef');
   };
 
+  // Handler: Save User Profile to Database
+  const handleSaveProfile = async (updated: UserProfile) => {
+    setUser(updated);
+    await saveUserProfileToDb(updated);
+  };
+
+  // Handler: Upgrade Subscription in Database
+  const handleUpgradeSubscription = async (
+    tier: SubscriptionTier,
+    billingCycle: BillingCycle,
+    paymentMethod: string,
+    price: number
+  ) => {
+    const updatedSub = await upgradeSubscriptionInDb({
+      tier,
+      billingCycle,
+      paymentMethod,
+      pricePerMonth: price,
+    });
+    if (updatedSub) {
+      setSubscription(updatedSub);
+    } else {
+      // Offline fallback
+      setSubscription((prev) => ({
+        ...prev,
+        tier,
+        billingCycle,
+        pricePerMonth: price,
+        paymentMethod,
+      }));
+    }
+  };
+
+  // Handler: Cancel Subscription
+  const handleCancelSubscription = async () => {
+    const updatedSub = await cancelSubscriptionInDb();
+    if (updatedSub) {
+      setSubscription(updatedSub);
+    } else {
+      setSubscription((prev) => ({
+        ...prev,
+        tier: 'free',
+        status: 'canceled',
+        pricePerMonth: 0,
+      }));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* Top Navigation */}
@@ -175,7 +286,10 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         bioState={bioState}
+        user={user}
+        subscription={subscription}
         onResetData={handleResetData}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         urgentCount={urgentCount}
       />
 
@@ -249,14 +363,33 @@ export const App: React.FC = () => {
             />
           </div>
         )}
+
+        {/* Tab 6: Subscription & Pricing Plans */}
+        {activeTab === 'plans' && (
+          <div className="animate-in fade-in duration-300">
+            <SubscriptionPlans
+              subscription={subscription}
+              onUpgrade={handleUpgradeSubscription}
+              onCancel={handleCancelSubscription}
+            />
+          </div>
+        )}
       </main>
+
+      {/* User Profile & Database Settings Modal */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        user={user}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSave={handleSaveProfile}
+      />
 
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>KitchenSync AI — Zero-Effort Kitchen & Biological Fuel Management</span>
           <span className="text-slate-400">
-            Built for The Busy Health-Conscious Professional • Dynamic CV & Generative Morphing
+            Built for The Busy Health-Conscious Professional • Persistent Database & Stripe-Ready Subscriptions
           </span>
         </div>
       </footer>
